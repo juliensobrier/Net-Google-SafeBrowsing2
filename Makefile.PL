@@ -13,7 +13,6 @@ WriteMakefile(
 		constant				=> 0,
 		Net::IPAddress			=> 0,
 		Test::More				=> 0,
-		Net::IPAddress			=> 0,
 		Text::Trim				=> 0,
 		Digest::HMAC_SHA1		=> 0,
 		MIME::Base64::URLSafe	=> 0,
