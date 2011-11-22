@@ -49,7 +49,7 @@ Net::Google::SafeBrowsing2 - Perl extension for the Google Safe Browsing v2 API.
 
 =head1 DESCRIPTION
 
-Net::Google::SafeBrowsing2 implements (most of) the Google Safe Browsing v2 API.
+Net::Google::SafeBrowsing2 implements the Google Safe Browsing v2 API.
 
 The library passes most of the unit tests listed in the API documentation. See the documentation (L<http://code.google.com/apis/safebrowsing/developers_guide_v2.html>) for more details about the failed tests.
 
