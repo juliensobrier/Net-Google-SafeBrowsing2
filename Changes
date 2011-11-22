@@ -1,0 +1,41 @@
+Revision history for Perl extension Net::Google::SafeBrowsing2.
+
+0.1  Wed Jul 21 16:35:48 2010
+	- original version
+
+0.2 Fri Nov 05 14:45:48 2010
+        - add support for MAC
+
+0.5 Mon Mar 07 16:55:00 2011
+		- add MySQl back-end storage
+        - introduce base class Net::Google::SafeBrowsing2::DBI
+		- update documentation
+
+    Tue Apr 05 14:40:00 2011
+		- fix Net::Google::SafeBrowsing2::DBI to work with all database types
+
+0.6 Mon Jul 25 13:21:00 2011
+		- Handle local database reset
+
+0.7 Mon Jul 25 15:18:00 2011
+		- Add local_lookup to perform a lookup against the local database only for debugging purpose.
+		- Fix duplicate insert of add chunks and sub chunks.
+
+0.8 Tue Aug 02 13:05:00 2011
+		- Fix chunk retrieval with MySQL backend (VARCHAR to VARBINARY)
+		- Reduce the number of full hashes requested 
+
+0.9 Tue Aug 09 15:26:00 2011
+		- Fix bug with local whitelisting (sub chunks).
+		- Fix the parsing of full hashes.
+
+1.0 Wed Aug 10 15:11:00
+		- Storage: add keep_all argument to keep expired full hashes in the database
+		- Separate the error output from debug output
+		- A lot of testing
+
+1.01 Wed Aug 26 13:49:00
+		- Use String::HexConvert for faster hex_to_ascii
+
+1.02 Thu Nov 10 10:00:00
+		- Fix uninitialized $self->{errors} variable
