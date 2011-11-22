@@ -355,11 +355,11 @@ Google Safe Browsing v2 API: L<http://code.google.com/apis/safebrowsing/develope
 
 =head1 AUTHOR
 
-Julien Sobrier, E<lt>jsobrier@zscaler.com<gt> or E<lt>julien@sobrier.netE<gt>
+Julien Sobrier, E<lt>jsobrier@zscaler.comE<gt> or E<lt>julien@sobrier.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Julien Sobrier
+Copyright (C) 2011 by Julien Sobrier
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

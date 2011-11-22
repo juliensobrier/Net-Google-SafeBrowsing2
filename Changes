@@ -39,3 +39,8 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 
 1.02 Thu Nov 10 10:00:00
 		- Fix uninitialized $self->{errors} variable
+
+1.03 Thu Nov 21 17:24:00
+		- no code change
+		- source code available on github at https://github.com/juliensobrier/Net-Google-SafeBrowsing2
+		- minor documentation updates
