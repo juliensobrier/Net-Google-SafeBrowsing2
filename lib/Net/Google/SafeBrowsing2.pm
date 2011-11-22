@@ -1748,6 +1748,7 @@ See L<Net::Google::SafeBrowsing> for the implementation of Google Safe Browsing 
 See L<Net::Google::SafeBrowsing2::Storage> and L<Net::Google::SafeBrowsing2::Sqlite> for information on storing and managing the Google Safe Browsing database.
 
 Google Safe Browsing v2 API: L<http://code.google.com/apis/safebrowsing/developers_guide_v2.html>
+git status
 
 =head1 AUTHOR
 
