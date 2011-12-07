@@ -20,12 +20,12 @@ use String::HexConvert;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 
 =head1 NAME
 
-Net::Google::SafeBrowsing2 - Perl extension for the Google Safe Browsing v2 API.
+Net::Google::SafeBrowsing2 - Perl extension for the Google Safe Browsing v2 API. (Google Safe Browsing v1 has been deprecated by Google.)
 
 =head1 SYNOPSIS
 
@@ -58,6 +58,8 @@ The Google Safe Browsing database must be stored and managed locally. L<Net::Goo
 You may want to look at "Google Safe Browsing v2: Implementation Notes" (L<http://www.zscaler.com/research/Google%20Safe%20Browsing%20v2%20API.pdf>), a collection of notes and real-world numbers about the API. This is intended for people who want to learn more about the API, whether as a user or to make their own implementation.
 
 The source code is available on github at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
+
+If you do not need to inspect more than 10,000 URLs a day, you can use L<Net::Google::SafeBrowsing2::Lookup> with the Google Safe Browsing v2 Lookup API which does not require to store and maintain a local database.
 
 =head1 CONSTANTS
 
@@ -163,7 +165,7 @@ Optional. Set to 1 to enable Message Authentication Code (MAC). 0 (disabled) by 
 
 =item debug
 
-Optional. Set to 1 to enable debugging. 0 (disabled by default).
+Optional. Set to 1 to enable debugging. 0 (disabled) by default.
 
 The debug output maybe quite large and can slow down significantly the update and lookup functions.
 
@@ -1739,16 +1741,19 @@ Fix uninitialized $self->{errors} variable
 
 The source code is available on github at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
 
+=item 1.04
+
+Introduce L<Net::Google::SafeBrowsing2::Lookup>. Remind people that Google Safe Browsing v1 has been deprecated by Google.
+
 =back
 
 =head1 SEE ALSO
 
-See L<Net::Google::SafeBrowsing> for the implementation of Google Safe Browsing v1.
-
-See L<Net::Google::SafeBrowsing2::Storage> and L<Net::Google::SafeBrowsing2::Sqlite> for information on storing and managing the Google Safe Browsing database.
+See L<Net::Google::SafeBrowsing2::Storage>, L<Net::Google::SafeBrowsing2::Sqlite> and L<Net::Google::SafeBrowsing2::MySQL> for information on storing and managing the Google Safe Browsing database.
 
 Google Safe Browsing v2 API: L<http://code.google.com/apis/safebrowsing/developers_guide_v2.html>
-git status
+
+SL<Net::Google::SafeBrowsing> (Google Safe Browsing v1) is depracted by Google since 12/01/2011.
 
 =head1 AUTHOR
 
@@ -1764,3 +1769,5 @@ at your option, any later version of Perl 5 you may have available.
 
 
 =cut
+
+1;

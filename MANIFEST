@@ -8,3 +8,4 @@ lib/Net/Google/SafeBrowsing2/Storage.pm
 lib/Net/Google/SafeBrowsing2/Sqlite.pm
 lib/Net/Google/SafeBrowsing2/MySQL.pm
 lib/Net/Google/SafeBrowsing2/DBI.pm
+lib/Net/Google/SafeBrowsing2/Lookup.pm
