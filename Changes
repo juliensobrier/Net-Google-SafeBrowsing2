@@ -44,3 +44,6 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 		- no code change
 		- source code available on github at https://github.com/juliensobrier/Net-Google-SafeBrowsing2
 		- minor documentation updates
+
+1.04 Wed Dec 07 10:26:00
+		- add Net::Google::SafeBrowsing2::Lookup (http://code.google.com/apis/safebrowsing/lookup_guide.html)
