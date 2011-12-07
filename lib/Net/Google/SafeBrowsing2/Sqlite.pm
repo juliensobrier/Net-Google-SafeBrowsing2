@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 
 
 =head1 NAME
@@ -179,17 +179,6 @@ sub create_table_a_chunks {
 		);
 	};
 	$self->{dbh}->do($index);
-
-	$index = qq{
-		CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
-			hostkey,
-			prefix,
-			num,
-			add_num,
-			list
-		);
-	};
-	$self->{dbh}->do($index);
 }
 
 sub create_table_s_chunks {
@@ -217,6 +206,17 @@ sub create_table_s_chunks {
 	$index = qq{
 		CREATE INDEX s_chunks_num ON s_chunks (
 			num
+		);
+	};
+	$self->{dbh}->do($index);
+
+	$index = qq{
+		CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
+			hostkey,
+			prefix,
+			num,
+			add_num,
+			list
 		);
 	};
 	$self->{dbh}->do($index);
@@ -338,6 +338,10 @@ Use more efficient add_chunk_a and add_chunk_s functions.
 =item 0.7
 
 Add option keep_all to keep expired full hashes. Useful for debugging.
+
+=item 0.8
+
+Index s_chunks_unique was created at the wrong place. Thanks to colinmkeith.
 
 =back
 
