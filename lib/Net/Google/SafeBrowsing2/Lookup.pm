@@ -8,7 +8,7 @@ use LWP::UserAgent;
 use URI;
 use Text::Trim;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -111,11 +111,11 @@ sub new {
 
 =head2 lookup()
 
-Lookup a URL against the Google Safe Browsing v2 lists.
+Lookup a list URLs against the Google Safe Browsing v2 lists.
 
   my %match = $gsb->lookup(url => 'http://www.gumblar.cn');
 
-Returns a hash C<url> => C<Google match>. The possible list of values for are: "ok" (no match), "malware", "phishing", "malware,phihsing" (match boths lists) and "error".
+Returns a hash C<url> => C<Google match>. The possible list of values for C<Google match> are: "ok" (no match), "malware", "phishing", "malware,phishing" (match both lists) and "error".
 
 Arguments
 
@@ -123,7 +123,7 @@ Arguments
 
 =item url
 
-Optional. URL to lookup.
+Optional. Single URL to lookup.
 
 =item urls
 
@@ -131,7 +131,7 @@ Optional. List of URLs to lookup.
 
 The Lookup API allows only 10,000 URL checks a day. if you need more, use the L<Net::Google::SafeBrowsing2> library.
 
-Each requests must contain 500 URLs at most. The lookup() methonds will split the list of URLS in blocks of 5000 URLs if needed.
+Each requests must contain 500 URLs at most. The lookup() method will split the list of URLS in blocks of 500 URLs if needed.
 
 =item delay
 
@@ -369,6 +369,15 @@ sub canonical_uri {
 
 =back
 
+=head1 CHANGELOG
+
+=over 4
+
+=item 0.2
+
+Documentation update.
+
+=back
 
 =head1 SEE ALSO
 
@@ -380,7 +389,7 @@ Julien Sobrier, E<lt>jsobrier@zscaler.comE<gt> or E<lt>julien@sobrier.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Julien Sobrier
+Copyright (C) 2012 by Julien Sobrier
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

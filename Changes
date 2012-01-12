@@ -47,3 +47,12 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 
 1.04 Wed Dec 07 10:26:00
 		- add Net::Google::SafeBrowsing2::Lookup (http://code.google.com/apis/safebrowsing/lookup_guide.html)
+
+	 Wed Dec 07 10:49:00
+		- Net::Google::SafeBrowsing2::Sqlite, xndex s_chunks_unique was created at the wrong place
+
+	Tue Dec 12 15:41:00
+		- Net::Google::SafeBrowsing2::Lookup 0.2: documentation update
+
+1.05 Thu Jan 12 14:26:00
+		- No code change. Move C<local_lookup> to PRIVATE FUNCTIONS to avoid confusions.

@@ -20,7 +20,7 @@ use String::HexConvert;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 
 =head1 NAME
@@ -578,64 +578,6 @@ sub lookup {
 }
 
 
-=head2 local_lookup()
-
-Lookup a URL against the local Google Safe Browsing database URL. This should be used for debugging purpose only. See the lookup function above.
-
-  my $match = $gsb->local_lookup(url => 'http://www.gumblar.cn');
-
-Returns the name of the list if there is any match, returns an empty string otherwise.
-
-Arguments
-
-=over 4
-
-=item list
-
-Optional. Lookup against a specific list. Use the list(s) from new() by default.
-
-=item url
-
-Required. URL to lookup.
-
-=back
-
-=cut
-sub local_lookup {
-	my ($self, %args) 	= @_;
-	my $list 			= $args{list}		|| '';
-	my $url 			= $args{url}		|| return '';
-
-	my @lists = @{$self->{list}};
-	@lists = @{[$args{list}]} if ($list ne '');
-
-
-	# TODO: create our own URI management for canonicalization
-	# fix for http:///foo.com (3 ///)
-	$url =~ s/^(https?:\/\/)\/+/$1/;
-
-
-
-	my $uri = URI->new($url)->canonical;
-
-	my $domain = $uri->host;
-	
-	my @hosts = $self->canonical_domain_suffixes($domain); # only top-3 in this case
-
-	foreach my $host (@hosts) {
-		$self->debug("Domain for key: $domain => $host\n");
-		my $suffix = $self->prefix("$host/"); # Don't forget trailing hash
-		$self->debug("Host key: " . $self->hex_to_ascii($suffix) . "\n");
-
-		my @matches = $self->local_lookup_suffix(lists => [@lists], url => $url, suffix => $suffix);
-# 		return $matches[0]->{list} if (scalar @matches > 0);
-		return $matches[0]->{list} . " " . $matches[0]->{chunknum}  if (scalar @matches > 0);
-	}
-
-	return '';
-
-}
-
 
 =head2 get_lists()
 
@@ -866,6 +808,63 @@ sub local_lookup_suffix {
 	return @add_chunks;
 }
 
+=head2 local_lookup()
+
+Lookup a URL against the local Google Safe Browsing database URL. This should be used for debugging purpose only. See the lookup for normal use.
+
+  my $match = $gsb->local_lookup(url => 'http://www.gumblar.cn');
+
+Returns the name of the list if there is any match, returns an empty string otherwise.
+
+Arguments
+
+=over 4
+
+=item list
+
+Optional. Lookup against a specific list. Use the list(s) from new() by default.
+
+=item url
+
+Required. URL to lookup.
+
+=back
+
+=cut
+sub local_lookup {
+	my ($self, %args) 	= @_;
+	my $list 			= $args{list}		|| '';
+	my $url 			= $args{url}		|| return '';
+
+	my @lists = @{$self->{list}};
+	@lists = @{[$args{list}]} if ($list ne '');
+
+
+	# TODO: create our own URI management for canonicalization
+	# fix for http:///foo.com (3 ///)
+	$url =~ s/^(https?:\/\/)\/+/$1/;
+
+
+
+	my $uri = URI->new($url)->canonical;
+
+	my $domain = $uri->host;
+	
+	my @hosts = $self->canonical_domain_suffixes($domain); # only top-3 in this case
+
+	foreach my $host (@hosts) {
+		$self->debug("Domain for key: $domain => $host\n");
+		my $suffix = $self->prefix("$host/"); # Don't forget trailing hash
+		$self->debug("Host key: " . $self->hex_to_ascii($suffix) . "\n");
+
+		my @matches = $self->local_lookup_suffix(lists => [@lists], url => $url, suffix => $suffix);
+# 		return $matches[0]->{list} if (scalar @matches > 0);
+		return $matches[0]->{list} . " " . $matches[0]->{chunknum}  if (scalar @matches > 0);
+	}
+
+	return '';
+
+}
 
 =head2 request_key()
 
@@ -1745,6 +1744,10 @@ The source code is available on github at L<https://github.com/juliensobrier/Net
 
 Introduce L<Net::Google::SafeBrowsing2::Lookup>. Remind people that Google Safe Browsing v1 has been deprecated by Google.
 
+=item 1.05
+
+No code change. Move C<local_lookup> to PRIVATE FUNCTIONS to avoid confusions.
+
 =back
 
 =head1 SEE ALSO
@@ -1753,7 +1756,7 @@ See L<Net::Google::SafeBrowsing2::Storage>, L<Net::Google::SafeBrowsing2::Sqlite
 
 Google Safe Browsing v2 API: L<http://code.google.com/apis/safebrowsing/developers_guide_v2.html>
 
-SL<Net::Google::SafeBrowsing> (Google Safe Browsing v1) is depracted by Google since 12/01/2011.
+L<Net::Google::SafeBrowsing> (Google Safe Browsing v1) is deprecated by Google since 12/01/2011.
 
 =head1 AUTHOR
 
@@ -1761,7 +1764,7 @@ Julien Sobrier, E<lt>jsobrier@zscaler.comE<gt> or E<lt>julien@sobrier.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Julien Sobrier
+Copyright (C) 2012 by Julien Sobrier
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
