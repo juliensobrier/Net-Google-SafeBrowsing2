@@ -3,7 +3,6 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
 
 use List::Util qw(first);
 use Test::More qw(no_plan);
@@ -13,10 +12,6 @@ require_ok( 'Net::Google::SafeBrowsing2' );
 
 
 #########################
-
-# Insert your test code below, the Test::More module is used here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
 
 my $gsb = Net::Google::SafeBrowsing2->new();
 

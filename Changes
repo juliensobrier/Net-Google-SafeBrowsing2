@@ -59,3 +59,8 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 
 1.05 Mon May 07 10:22:00
 		- Added Postgres storage from njohnston
+
+1.06 Sun Jun 03 21:40:00
+		- Update DBI and MySQL back-end to keep empty sub chunks
+		- MySQL: truncate prefixes longer than 8 bytes
+		- Add a warning about the number of updates required with an empty database

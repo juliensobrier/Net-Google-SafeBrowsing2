@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.6';
+our $VERSION = '0.7';
 
 
 =head1 NAME
@@ -300,6 +300,11 @@ sub add_chunks_s {
 	foreach my $chunk (@$chunks) {
 		$del->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $chunk->{add_chunknum}, $list );
 		$add->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $chunk->{add_chunknum}, $list );
+	}
+
+	if (scalar @$chunks == 0) { # keep empty chunks
+		$del->execute( '', '', $chunknum, $list );
+		$add->execute( '', '', $chunknum, $list );
 	}
 }
 
@@ -595,25 +600,29 @@ sub reset {
 
 =over 4
 
-=item 0.2
+=item 0.7
 
-Replace "INSERT OR REPLACE" statements by DELETE + INSERT to work with all databases
+Keep empty sub chunks.
 
-=item 0.3
+=item 0.6
 
-Add reset function to reset all tables for a given list
-
-=item 0.4
-
-Fix duplicate insert of add chunks and sub chunks.
+Add option keep_all to keep expired full hashes. Useful for debugging.
 
 =item 0.5
 
 Return the hostkey in get_add_chunks.
 
-=item 0.6
+=item 0.4
 
-Add option keep_all to keep expired full hashes. Useful for debugging.
+Fix duplicate insert of add chunks and sub chunks.
+
+=item 0.3
+
+Add reset function to reset all tables for a given list
+
+=item 0.2
+
+Replace "INSERT OR REPLACE" statements by DELETE + INSERT to work with all databases
 
 =back
 
