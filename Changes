@@ -64,3 +64,4 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 		- Update DBI and MySQL back-end to keep empty sub chunks
 		- MySQL: truncate prefixes longer than 8 bytes
 		- Add a warning about the number of updates required with an empty database
+		- Storage: reset function is required

@@ -612,7 +612,6 @@ sub add_full_hashes {
 	foreach my $hash (@$full_hashes) {
 		# INSERT INTO [...] (num, hash, list, timestamp) VALUES ($hash->{chunknum}, $hash->{hash}, $hash->{list}, $timestamp);
 	}
-
 }
 
 =head2 delete_full_hashes()
@@ -800,7 +799,7 @@ sub get_mac_keys {
 	my ($self, %args) 	= @_;
 
 
-	# return { client_key => '', wrapped_key => '' }
+	return { client_key => '', wrapped_key => '' }
 }
 
 =head2 delete_add_keys()
@@ -853,8 +852,42 @@ No return value
 sub delete_mac_keys {
 	my ($self, %args) 	= @_;
 
-	$self->{dbh}->do("DELETE FROM mac_keys WHERE 1");
+# 	# DELETE FROM mac_keys WHERE 1
 }
+
+
+=head2 reset()
+
+Remove all local data
+
+	$storage->delete_mac_keys();
+
+
+Arguments
+
+=over 4
+
+=item list
+
+Required. Google Safe Browsing list name.
+
+=back
+
+No return value
+
+=cut
+
+sub reset {
+	my ($self, %args) 	= @_;
+	my $list			= $args{'list'}		|| '';
+
+	# DELETE FROM s_chunks WHERE list = $list
+	# DELETE FROM a_chunks WHERE list = $list
+	# DELETE FROM full_hashes WHERE list = $list
+	# DELETE FROM full_hashes_errors WHERE list = $list
+	# DELETE FROM updates WHERE list = $list
+}
+
 
 =back
 
@@ -910,13 +943,17 @@ sub ascii_to_hex {
 
 =over 4
 
-=item 0.2
+=item 0.4
 
-Add functions to store and retrieve Message Authentication Code (MAC) keys.
+Add reset mehtod to empty local database.
 
 =item 0.3
 
 Return the hostkey as part of the add chunks (get_add_chunks).
+
+=item 0.2
+
+Add functions to store and retrieve Message Authentication Code (MAC) keys.
 
 =back
 
