@@ -20,7 +20,7 @@ use String::HexConvert;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 
 =head1 NAME
@@ -60,6 +60,8 @@ You may want to look at "Google Safe Browsing v2: Implementation Notes" (L<http:
 The source code is available on github at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
 
 If you do not need to inspect more than 10,000 URLs a day, you can use L<Net::Google::SafeBrowsing2::Lookup> with the Google Safe Browsing v2 Lookup API which does not require to store and maintain a local database.
+
+IMPORTANT: If you start with an empty database, you will need to perform several updates to retrieve all the Google Safe Browsing information. This may require up to 24 hours. This is a limitation of the Google API, not of this module. See "Google Safe Browsing v2: Implementation Notes" at L<http://www.zscaler.com/research/Google%20Safe%20Browsing%20v2%20API.pdf>.
 
 =head1 CONSTANTS
 
@@ -225,7 +227,7 @@ Return the status of the update (see the list of constants above): INTERNAL_ERRO
 
 This function can handle two lists at the same time. If one of the list should not be updated, it will automatically skip it and update the other one. It is faster to update two lists at once rather than doing them one by one.
 
-NOTE: If you start with an empty database, you will need to perform several updates to retrieve all the Google Safe Browsing information. This is a limitation of the Google API, not of this module.
+NOTE: If you start with an empty database, you will need to perform several updates to retrieve all the Google Safe Browsing information. This may require up to 24 hours. This is a limitation of the Google API, not of this module. See "Google Safe Browsing v2: Implementation Notes" at L<http://www.zscaler.com/research/Google%20Safe%20Browsing%20v2%20API.pdf>.
 
 
 Arguments
@@ -468,8 +470,6 @@ sub update {
 	
 				my $encoded = substr($data, 0, $chunk_length, '');
 	# 			print "Length 3: ", length $data, "\n"; # 58604 -137
-	
-	
 	
 				if ($type eq 's:') {
 					my @chunks = $self->parse_s(value => $encoded, hash_length => $hash_length);
