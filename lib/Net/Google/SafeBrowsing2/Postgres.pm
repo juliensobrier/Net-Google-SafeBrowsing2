@@ -9,7 +9,7 @@ use Carp;
 use DBI;
 use List::Util qw(first);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 

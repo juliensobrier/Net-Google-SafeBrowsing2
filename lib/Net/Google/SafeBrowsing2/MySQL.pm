@@ -210,7 +210,7 @@ sub create_table_s_chunks {
 			hostkey VARBINARY( 8 ),
 			prefix VARBINARY( 8 ),
 			num INT NOT NULL,
-			add_num INT NOT NULL,
+			add_num INT DEFAULT 0,
 			list VARCHAR( 50 ) NOT NULL
 		);
 	};
@@ -318,7 +318,7 @@ sub add_chunks_s {
 	}
 
 	if (scalar @$chunks == 0) { # keep empty chunks
-		$add->execute( '', '', $chunknum, $list );
+		$add->execute( '', '',  $chunknum, '', $list );
 	}
 }
 
@@ -331,10 +331,10 @@ sub add_chunks_a {
 	my $add = $self->{dbh}->prepare('INSERT IGNORE INTO a_chunks (hostkey, prefix, num, list) VALUES (?, ?, ?, ?)');
 
 	foreach my $chunk (@$chunks) {
-		# 32-byte prefix sen at chunk 69961
+		# 32-byte prefix seen at chunk 69961
 		# If this becomes more of a problem, the schema will have to be adjusted.
 		if (length($chunk->{prefix}) > 8) {
-		$chunk->{prefix} = substr $chunk->{prefix}, 0, 4;
+			$chunk->{prefix} = substr $chunk->{prefix}, 0, 4;
 		}
 
 		$add->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $list );

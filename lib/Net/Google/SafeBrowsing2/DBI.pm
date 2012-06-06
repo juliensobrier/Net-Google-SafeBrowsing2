@@ -97,6 +97,7 @@ sub close {
 	$self->{dbh}->disconnect;
 }
 
+
 =back
 
 =cut
@@ -172,7 +173,7 @@ sub create_table_s_chunks {
 			hostkey VARCHAR( 8 ),
 			prefix VARCHAR( 8 ),
 			num INT NOT NULL,
-			add_num INT NOT NULL,
+			add_num INT  Default '0',
 			list VARCHAR( 50 ) NOT NULL
 		);
 	};
@@ -303,8 +304,8 @@ sub add_chunks_s {
 	}
 
 	if (scalar @$chunks == 0) { # keep empty chunks
-		$del->execute( '', '', $chunknum, $list );
-		$add->execute( '', '', $chunknum, $list );
+		$del->execute( '', '', '', $chunknum, $list );
+		$add->execute( '', '', '', $chunknum, $list );
 	}
 }
 
@@ -593,6 +594,32 @@ sub reset {
 	$sth->execute( $list );
 }
 
+sub create_range {
+	my ($self, %args) 	= @_;
+	my $numbers			= $args{numbers}	|| []; # should already be ordered
+
+	return '' if (scalar @$numbers == 0);
+
+	my $range = $$numbers[0];
+	my $new_range = 0;
+	for(my $i = 1; $i < scalar @$numbers; $i++) {
+# 		next if ($$numbers[$i] == $$numbers[$i-1]); # should not happen
+
+		if ($$numbers[$i] != $$numbers[$i-1] + 1) {
+			$range .= $$numbers[$i-1] if ($i > 1 && $new_range == 1);
+			$range .= ',' . $$numbers[$i];
+
+			$new_range = 0
+		}
+		elsif ($new_range == 0) {
+			$range .= "-";
+			$new_range = 1;
+		}
+	}
+	$range .= $$numbers[scalar @$numbers - 1] if ($new_range == 1);
+
+	return $range;
+}
 
 =head1 CHANGELOG
 
@@ -600,7 +627,11 @@ sub reset {
 
 =item 0.7
 
+New C<export()> function.
+
 Keep empty sub chunks.
+
+Fix index for sub chunks.
 
 =item 0.6
 
