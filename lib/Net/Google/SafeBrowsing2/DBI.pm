@@ -194,7 +194,7 @@ sub create_table_s_chunks {
 	$self->{dbh}->do($index);
 
 	$index = qq{
-		CREATE INDEX a_chunks_num_list ON a_chunks (
+		CREATE INDEX s_chunks_num_list ON s_chunks (
 			num,
 			list
 		);

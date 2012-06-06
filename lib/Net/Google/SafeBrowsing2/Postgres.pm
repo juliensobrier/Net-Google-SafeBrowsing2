@@ -203,57 +203,6 @@ sub create_table_full_hashes_errors {
   $self->{dbh}->do($schema);
 }
 
-# Overridden because the method in the base class has a typo or copy/paste
-# failure: this method creates a_chunks_num_list index when it's meant to
-# be s_chunks_num_list.
-sub create_table_s_chunks {
-  my ($self, %args) = @_;
-
-  my $schema = qq{
-    CREATE TABLE s_chunks (
-      hostkey VARCHAR( 8 ),
-      prefix VARCHAR( 8 ),
-      num INT NOT NULL,
-      add_num INT NOT NULL,
-      list VARCHAR( 50 ) NOT NULL
-    );
-  };
-
-  $self->{dbh}->do($schema);
-
-  my $index = qq{
-    CREATE INDEX s_chunks_hostkey ON s_chunks (
-      hostkey
-    );
-  };
-  $self->{dbh}->do($index);
-
-  $index = qq{
-    CREATE INDEX s_chunks_num ON s_chunks (
-      num
-    );
-  };
-  $self->{dbh}->do($index);
-
-  $index = qq{
-    CREATE INDEX s_chunks_num_list ON s_chunks (
-      num,
-      list
-    );
-  };
-  $self->{dbh}->do($index);
-
-  $index = qq{
-    CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
-      hostkey,
-      prefix,
-      num,
-      add_num,
-      list
-    );
-  };
-  $self->{dbh}->do($index);
-}
 
 sub add_chunks_a {
   my ($self, %args) = @_;
