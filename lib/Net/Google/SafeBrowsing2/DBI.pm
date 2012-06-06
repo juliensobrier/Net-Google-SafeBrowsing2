@@ -587,8 +587,8 @@ sub reset {
 	$sth = $self->{dbh}->prepare('DELETE FROM full_hashes WHERE list = ?');
 	$sth->execute( $list );
 
-	$sth = $self->{dbh}->prepare('DELETE FROM full_hashes_errors WHERE list = ?');
-	$sth->execute( $list );
+	$sth = $self->{dbh}->prepare('DELETE FROM full_hashes_errors');
+	$sth->execute();
 
 	$sth = $self->{dbh}->prepare('DELETE FROM updates WHERE list = ?');
 	$sth->execute( $list );
