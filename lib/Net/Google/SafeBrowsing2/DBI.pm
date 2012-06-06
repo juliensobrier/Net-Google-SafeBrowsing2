@@ -523,7 +523,7 @@ sub full_hash_ok {
 
 	if (scalar @$rows > 0) {
 		$self->{dbh}->do("UPDATE full_hashes_errors SET errors = 0, timestamp = ? WHERE id = ?", $timestamp, $rows->[0]->{id});
-		$self->{dbh}->do("DELETE FROM full_hashes_errors WHERE id = ?", $timestamp, $rows->[0]->{id});
+		$self->{dbh}->do("DELETE FROM full_hashes_errors WHERE id = ?", $rows->[0]->{id});
 	}
 }
 
@@ -575,8 +575,6 @@ sub delete_mac_keys {
 
 sub reset {
 	my ($self, %args) 	= @_;
-	my $chunknum		= $args{chunknum}	|| 0;
-	my $chunks			= $args{chunks}		|| [];
 	my $list			= $args{'list'}		|| '';
 
 	my $sth = $self->{dbh}->prepare('DELETE FROM s_chunks WHERE list = ?');
