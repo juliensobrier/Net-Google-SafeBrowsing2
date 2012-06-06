@@ -232,6 +232,14 @@ sub create_table_s_chunks {
 	$self->{dbh}->do($index);
 
 	$index = qq{
+		CREATE INDEX s_chunks_num_list ON s_chunks (
+			num,
+			list
+		);
+	};
+	$self->{dbh}->do($index);
+
+	$index = qq{
 		CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
 			hostkey,
 			prefix,
