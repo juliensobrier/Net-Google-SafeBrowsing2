@@ -61,7 +61,10 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 		- Added Postgres storage from njohnston
 
 1.06 Sun Jun 03 21:40:00
-		- Update DBI and MySQL back-end to keep empty sub chunks
+		- Update DBI and MySQL back-end to keep empty sub chunks. Fix index for s_chunks table
 		- MySQL: truncate prefixes longer than 8 bytes
 		- Add a warning about the number of updates required with an empty database
 		- Storage: reset function is required
+
+1.07 Fri Jun 08 18:38:00
+		- Import/Export feature for add chunks and sub chunks. Can be used to move from one back-end storage to another.

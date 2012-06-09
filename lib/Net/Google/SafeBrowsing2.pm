@@ -14,13 +14,13 @@ use Digest::HMAC_SHA1 qw(hmac_sha1 hmac_sha1_hex);
 use MIME::Base64::URLSafe;
 use MIME::Base64;
 use String::HexConvert;
-
+use File::Slurp;
 
 
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 
 =head1 NAME
@@ -447,68 +447,15 @@ sub update {
 
 			return MAC_ERROR;
 		}
-	
-		my $chunk_num = 0;
-		my $hash_length = 0;
-		my $chunk_length = 0;
-	
-		while (length $data > 0) {
-	# 		print "Length 1: ", length $data, "\n"; # 58748
-	
-			my $type = substr($data, 0, 2, ''); # s:34321:4:137
-	# 		print "Length 1.5: ", length $data, "\n"; # 58746 -2
-	
-			if ($data  =~ /^(\d+):(\d+):(\d+)\n/sgi) {
-				$chunk_num = $1;
-				$hash_length = $2;
-				$chunk_length = $3;
-	
-				# shorten data
-				substr($data, 0, length($chunk_num) + length($hash_length) + length($chunk_length) + 3, '');
-	# 			print "Remove ", length($chunk_num) + length($hash_length) + length($chunk_length) + 3, "\n";
-	# 			print "Length 2: ", length $data, "\n"; # 58741 -5
-	
-				my $encoded = substr($data, 0, $chunk_length, '');
-	# 			print "Length 3: ", length $data, "\n"; # 58604 -137
-	
-				if ($type eq 's:') {
-					my @chunks = $self->parse_s(value => $encoded, hash_length => $hash_length);
 
-					$self->{storage}->add_chunks(type => 's', chunknum => $chunk_num, chunks => [@chunks], list => $list); # Must happen all at once => not 100% sure
-				}
-				elsif ($type eq 'a:') {
-					my @chunks = $self->parse_a(value => $encoded, hash_length => $hash_length);
-					$self->{storage}->add_chunks(type => 'a', chunknum => $chunk_num, chunks => [@chunks], list => $list); # Must happen all at once => not 100% sure
-				}
-				else {
-					$self->error("Incorrect chunk type: $type, should be a: or s:\n");
-
-					foreach my $list (@lists) {
-						$self->update_error('time' => $last_update, list => $list);
-					}
-					return INTERNAL_ERROR;# failed
-				}
-	
-				$self->debug("$type$chunk_num:$hash_length:$chunk_length OK\n");
-			
+		my $result = $self->parse_data(data => $data, list => $list);
+		if ($result != SUCCESSFUL) {
+			foreach my $list (@lists) {
+				$self->update_error('time' => $last_update, list => $list);
 			}
-# 			elsif ($data =~ /e:pleaserekey/ && $mac) { # May neverr happen here?
-# 				$self->Debug("MAC key has been expired (redirection)\n");
-# 	
-# 				$self->{storage}->delete_mac_keys();
-# 				return $self->update(list => $list, force => $force, mac => $mac);
-# 			}
-			else {
-				$self->error("could not parse header\n");
 
-				foreach my $list (@lists) {
-					$self->update_error('time' => $last_update, list => $list);
-				}
-				return INTERNAL_ERROR;# failed
-			}
+			return $result;
 		}
-
-	# 	last;
 	}
 
 	foreach my $list (@lists) {
@@ -519,6 +466,43 @@ sub update {
 	return $result; # ok
 }
 
+=head2 import_chunks()
+
+Import add and sub chunks from a file.
+
+  my $result = $gsb->import_chunks(list => MALWARE, file => 'malware.dat');
+
+Return the status of the import: INTERNAL_ERROR or SUCCESSFUL.
+
+This function should be used to initialize an empty back-end storage.
+
+
+Arguments
+
+=over 4
+
+=item list
+
+Required. Google list to use.
+
+=item file
+
+Required. File that contains the list of chunks. This file can be created with the C<export> function inherited from C<Net::Google::SafeBrowsing2::DBI>.
+
+=back
+
+=cut
+
+sub import_chunks {
+	my ($self, %args) 	= @_;
+	my $list 			= $args{list}		|| '';
+	my $file			= $args{file}		|| "$list.dat";
+
+	my $data = read_file($file, { binmode => ':raw' });
+
+	return $self->parse_data(data => $data, list => $list);
+
+}
 
 =head2 lookup()
 
@@ -1039,6 +1023,67 @@ sub ua {
 
 =head2 parse_s()
 
+Parse data from a rediration (add asnd sub chunk information).
+
+=cut
+
+sub parse_data {
+	my ($self, %args) 	= @_;
+	my $data			= $args{data}		 || '';
+	my $list  			= $args{list}		 || '';
+
+	my $chunk_num = 0;
+	my $hash_length = 0;
+	my $chunk_length = 0;
+
+	while (length $data > 0) {
+	# 		print "Length 1: ", length $data, "\n"; # 58748
+	
+			my $type = substr($data, 0, 2, ''); # s:34321:4:137
+	# 		print "Length 1.5: ", length $data, "\n"; # 58746 -2
+	
+			if ($data  =~ /^(\d+):(\d+):(\d+)\n/sgi) {
+				$chunk_num = $1;
+				$hash_length = $2;
+				$chunk_length = $3;
+	
+				# shorten data
+				substr($data, 0, length($chunk_num) + length($hash_length) + length($chunk_length) + 3, '');
+	# 			print "Remove ", length($chunk_num) + length($hash_length) + length($chunk_length) + 3, "\n";
+	# 			print "Length 2: ", length $data, "\n"; # 58741 -5
+	
+				my $encoded = substr($data, 0, $chunk_length, '');
+	# 			print "Length 3: ", length $data, "\n"; # 58604 -137
+	
+				if ($type eq 's:') {
+					my @chunks = $self->parse_s(value => $encoded, hash_length => $hash_length);
+
+					$self->{storage}->add_chunks(type => 's', chunknum => $chunk_num, chunks => [@chunks], list => $list); # Must happen all at once => not 100% sure
+				}
+				elsif ($type eq 'a:') {
+					my @chunks = $self->parse_a(value => $encoded, hash_length => $hash_length);
+					$self->{storage}->add_chunks(type => 'a', chunknum => $chunk_num, chunks => [@chunks], list => $list); # Must happen all at once => not 100% sure
+				}
+				else {
+					$self->error("Incorrect chunk type: $type, should be a: or s:\n");
+					return INTERNAL_ERROR;# failed
+				}
+	
+				$self->debug("$type$chunk_num:$hash_length:$chunk_length OK\n");
+			
+			}
+			else {
+				$self->error("could not parse header\n");
+				return INTERNAL_ERROR;# failed
+			}
+		}
+
+	return SUCCESSFUL;
+}
+
+
+=head2 parse_s()
+
 Parse s chunks information for a database update.
 
 =cut
@@ -1046,7 +1091,7 @@ Parse s chunks information for a database update.
 sub parse_s {
 	my ($self, %args) 	= @_;
 	my $value 			= $args{value}			|| return ();
-	my $hash_length 	= $args{hash_length}	|| 4;;
+	my $hash_length 	= $args{hash_length}	|| 4;
 
 	my @data = ();
 
@@ -1687,9 +1732,58 @@ sub expand_range {
 
 =over 4
 
-=item 0.2
+=item 1.07
 
-Add support for Message Authentication Code (MAC)
+Add C<import_chunks()> feature to import add chunks and sub chunks from a file.
+
+=item 1.05
+
+No code change. Move C<local_lookup> to PRIVATE FUNCTIONS to avoid confusions.
+
+=item 1.04
+
+Introduce L<Net::Google::SafeBrowsing2::Lookup>. Remind people that Google Safe Browsing v1 has been deprecated by Google.
+
+=item 1.03
+
+The source code is available on github at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
+
+=item 1.02
+
+Fix uninitialized $self->{errors} variable
+
+=item 1.01
+
+Use String::HexConvert for faster hex_to_ascii.
+
+=item 1.0
+
+Separate the error output from the debug output.
+
+=item 0.9
+
+Fix bug with local whitelisting (sub chunks). Fix the parsing of full hashes.
+
+=item 0.8
+
+Reduce the number of full hash requests.
+
+=item 0.7
+
+Add local_lookup to perform a lookup against the local database only. This function should be used for debugging purpose only.
+Small code optimizations.
+
+=item 0.6
+
+Handle local database reset.
+
+=item 0.5
+
+Update documentation.
+
+=item 0.4
+
+Speed update the database update. The first update went down from 20 minutes to 20 minutes.
 
 =item 0.3
 
@@ -1699,54 +1793,10 @@ Remove dependency on Switch (thanks to Curtis Jewel).
 
 Fix value of FULL_HASH_TIME.
 
-=item 0.4
+=item 0.2
 
-Speed update the database update. The first update went down from 20 minutes to 20 minutes.
+Add support for Message Authentication Code (MAC)
 
-=item 0.5
-
-Update documentation.
-
-=item 0.6
-
-Handle local database reset.
-
-=item 0.7
-
-Add local_lookup to perform a lookup against the local database only. This function should be used for debugging purpose only.
-Small code optimizations.
-
-=item 0.8
-
-Reduce the number of full hash requests.
-
-=item 0.9
-
-Fix bug with local whitelisting (sub chunks). Fix the parsing of full hashes.
-
-=item 1.0
-
-Separate the error output from the debug output.
-
-=item 1.01
-
-Use String::HexConvert for faster hex_to_ascii.
-
-=item 1.02
-
-Fix uninitialized $self->{errors} variable
-
-=item 1.03
-
-The source code is available on github at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
-
-=item 1.04
-
-Introduce L<Net::Google::SafeBrowsing2::Lookup>. Remind people that Google Safe Browsing v1 has been deprecated by Google.
-
-=item 1.05
-
-No code change. Move C<local_lookup> to PRIVATE FUNCTIONS to avoid confusions.
 
 =back
 

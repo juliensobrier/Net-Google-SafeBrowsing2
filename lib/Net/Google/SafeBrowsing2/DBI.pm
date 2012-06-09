@@ -98,6 +98,148 @@ sub close {
 }
 
 
+=head2 export()
+
+Export add chunks and sub chunks to a file. The file content looks like what Google sends in redirections. The file can be used with the C<import_chunks> function from C<Net::Google::SafeBrowsing2>. This is useful when moving from one back-end storage to another
+
+  $storage->export(list => MALWARE);
+
+Arguments
+
+=over 4
+
+=item list
+
+Required. The Google Safe Browsing list to export.
+
+=item file
+
+Optional. Filename to export to. Uses "$list.dat" by default.
+
+=back
+
+=cut
+
+sub export {
+	my ($self, %args) 	= @_;
+	my $list			= $args{list}	|| '';
+	my $file			= $args{file}	|| "$list.dat";
+
+
+	open EXPORT, "> $file" or croak "Cannot open $file: $!\n";
+	binmode EXPORT;
+
+	# Add chunks
+	my $num = 0;
+	my $chunk_data = '';
+	my $hostkey = '';
+	my $prefixes = '';
+	my $count = 0;
+
+	my $sth = $self->{dbh}->prepare("SELECT * FROM a_chunks WHERE list = ? ORDER BY num ASC");
+	$sth->execute($list);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		if (($num != $row->{num} && $num != 0) || $num > 1000) { # if num is too bif, we can not print chr($num) a a single byte
+			$chunk_data .= $hostkey;
+			$chunk_data .= chr($count);
+			$chunk_data .= $prefixes;
+			
+			print EXPORT "a:", $num, ":", length($hostkey), ":", length($chunk_data), "\n";
+			print EXPORT $chunk_data;
+
+			$num = $row->{num};
+			$chunk_data = '';
+			$hostkey = '';
+			$prefixes = '';
+			$count = 0;
+		}
+		elsif ($num == 0) {
+			$num = $row->{num};
+			$hostkey = $row->{hostkey};
+		}
+		if ($hostkey ne $row->{hostkey} && $hostkey ne '') {
+			$chunk_data .= $hostkey;
+			$chunk_data .= chr($count);
+			$chunk_data .= $prefixes;
+		
+			$count = 0;
+			$prefixes = '';
+		}
+		$hostkey = $row->{hostkey};
+		if (length($row->{prefix}) > 0) {
+			$prefixes .= $row->{prefix};
+			$count++;
+		}
+	}
+	$sth->finish();
+
+	$chunk_data .= $hostkey;
+	$chunk_data .= chr($count);
+	$chunk_data .= $prefixes;
+	print EXPORT "a:", $num, ":", length($hostkey), ":", length($chunk_data) , "\n";
+	print EXPORT $chunk_data;
+
+
+	# sub chunks
+	$num = 0;
+	$chunk_data = '';
+	$hostkey = '';
+	$prefixes = '';
+	$count = 0;
+
+	$sth = $self->{dbh}->prepare("SELECT * FROM s_chunks WHERE list = ? ORDER BY num ASC");
+	$sth->execute($list);
+
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		if (($num != $row->{num} && $num != 0) || $num > 1000) { # if num is too bif, we can not print chr($num) a a single byte
+			$chunk_data .= $hostkey;
+			$chunk_data .= chr($count) if (length($hostkey) > 0);
+			$chunk_data .= $prefixes;
+			
+			print EXPORT "s:", $num, ":", length($hostkey), ":", length($chunk_data), "\n";
+			print EXPORT $chunk_data;
+
+			$num = $row->{num};
+			$chunk_data = '';
+			$hostkey = '';
+			$prefixes = '';
+			$count = 0;
+		}
+		elsif ($num == 0) {
+			$num = $row->{num};
+			$hostkey = $row->{hostkey};
+		}
+		if ($hostkey ne $row->{hostkey} && $hostkey ne '') {
+			$chunk_data .= $hostkey;
+			$chunk_data .= chr($count) if (length($hostkey) > 0);
+			$chunk_data .= $prefixes;
+		
+			$count = 0;
+			$prefixes = '';
+		}
+		$hostkey = $row->{hostkey};
+		if ($row->{add_num} > 0) {
+			$prefixes .= $self->ascii_to_hex( sprintf("%08x", $row->{add_num}) );
+		}
+
+		if (length($row->{prefix}) > 0 && $row->{add_num} > 0) {
+			$prefixes .= $row->{prefix};
+			$count++;
+		}
+	}
+	$sth->finish();
+
+	$chunk_data .= $hostkey;
+	$chunk_data .= chr($count) if (length($hostkey) > 0);
+	$chunk_data .= $prefixes;
+	print EXPORT "s:", $num, ":", length($hostkey), ":", length($chunk_data) , "\n";
+	print EXPORT $chunk_data;
+
+	CORE::close(EXPORT);
+}
+
 =back
 
 =cut
