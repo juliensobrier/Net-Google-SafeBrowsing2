@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.8';
+our $VERSION = '0.9';
 
 
 =head1 NAME
@@ -54,6 +54,10 @@ Required. File to store the database.
 
 Optional. Set to 1 to keep old information (such as expiring full hashes) in the database. 0 (delete) by default.
 
+=item cache_size
+
+Sqlite cache size. 20000 by default.
+
 =back
 
 
@@ -67,6 +71,7 @@ sub new {
 	my $self = { # default arguments
 		keep_all	=> 0,
 		file		=> 'gsb2.db',
+		cache_size 	=> 20000,
 
 		%args,
 	};
@@ -102,6 +107,7 @@ sub init {
 	$self->{dbh} = DBI->connect("dbi:SQLite:dbname=" . $self->{file}, "", "");
 	$self->{dbh}->do("PRAGMA journal_mode = OFF");
 	$self->{dbh}->do("PRAGMA synchronous = OFF"); 
+	$self->{dbh}->do("PRAGMA cache_size = " . $self->{cache_size}); 
 
 	my @tables = $self->{dbh}->tables;
 
@@ -123,6 +129,13 @@ sub init {
 	if (! defined first { $_ eq '"main"."mac_keys"' || $_ eq '"mac_keys"' } @tables) { 
 		$self->create_table_mac_keys();
 	}
+
+	# Remove indexes created in previous versions
+	$self->{dbh}->do('DROP INDEX IF EXISTS a_chunks_hostkey;');
+	$self->{dbh}->do('DROP INDEX IF EXISTS a_chunks_num_list;');
+
+	$self->{dbh}->do('DROP INDEX IF EXISTS s_chunks_hostkey;');
+	$self->{dbh}->do('DROP INDEX IF EXISTS s_chunks_num;');
 }
 
 
@@ -160,7 +173,7 @@ sub create_table_a_chunks {
 			hostkey
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE INDEX a_chunks_num_list ON a_chunks (
@@ -168,7 +181,7 @@ sub create_table_a_chunks {
 			list
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE UNIQUE INDEX a_chunks_unique ON a_chunks (
@@ -201,14 +214,14 @@ sub create_table_s_chunks {
 			hostkey
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE INDEX s_chunks_num ON s_chunks (
 			num
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
@@ -284,9 +297,15 @@ sub add_chunks_s {
 
 	my $add = $self->{dbh}->prepare('INSERT OR IGNORE INTO s_chunks (hostkey, prefix, num, add_num, list) VALUES (?, ?, ?, ?, ?)');
 
+	$self->{dbh}->begin_work;
 	foreach my $chunk (@$chunks) {
 		$add->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $chunk->{add_chunknum}, $list );
 	}
+
+	if (scalar @$chunks == 0) { # keep empty chunks
+		$add->execute( '', '', $chunknum, '', $list );
+	}
+	$self->{dbh}->commit;
 }
 
 sub add_chunks_a {
@@ -297,6 +316,7 @@ sub add_chunks_a {
 
 	my $add = $self->{dbh}->prepare('INSERT OR IGNORE INTO a_chunks (hostkey, prefix, num, list) VALUES (?, ?, ?, ?)');
 
+	$self->{dbh}->begin_work;
 	foreach my $chunk (@$chunks) {
 		$add->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $list );
 	}
@@ -304,12 +324,43 @@ sub add_chunks_a {
 	if (scalar @$chunks == 0) { # keep empty chunks
 		$add->execute( '', '', $chunknum, $list );
 	}
+	$self->{dbh}->commit;
 }
 
 
 =head1 CHANGELOG
 
 =over 4
+
+=item 0.9
+
+Keep empty sub chunks. Improve performances (remove sone idexes, use trnsactions).
+
+New cache_size option.
+
+=item 0.8
+
+Index s_chunks_unique was created at the wrong place. Thanks to colinmkeith.
+
+=item 0.7
+
+Add option keep_all to keep expired full hashes. Useful for debugging.
+
+=item 0.6
+
+Use more efficient add_chunk_a and add_chunk_s functions.
+
+=item 0.5
+
+Use base class L<Net::Google::SafeBrowsing2::DBI>.
+
+=item 0.4
+
+Disable journalization. This speeds up updated by about 10x.
+
+=item 0.3
+
+Fix typos in the documentation.
 
 =item 0.2
 
@@ -319,32 +370,7 @@ Add table and function to store and retrieve the Message Authentication Code (MA
 
 In some environments, the module was trying to re-create existing tables. Fixed (Thank you to  Luis Alberto Perez).
 
-=item 0.3
-
-Fix typos in the documentation.
-
-=item 0.4
-
-Disable journalization. This speeds up updated by about 10x.
-
-=item 0.5
-
-Use base class L<Net::Google::SafeBrowsing2::DBI>.
-
-=item 0.6
-
-Use more efficient add_chunk_a and add_chunk_s functions.
-
-=item 0.7
-
-Add option keep_all to keep expired full hashes. Useful for debugging.
-
-=item 0.8
-
-Index s_chunks_unique was created at the wrong place. Thanks to colinmkeith.
-
 =back
-
 
 =head1 SEE ALSO
 
