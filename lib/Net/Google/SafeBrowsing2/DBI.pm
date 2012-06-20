@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.7';
+our $VERSION = '0.7.1';
 
 
 =head1 NAME
@@ -446,8 +446,8 @@ sub add_chunks_s {
 	}
 
 	if (scalar @$chunks == 0) { # keep empty chunks
-		$del->execute( '', '', '', $chunknum, $list );
-		$add->execute( '', '', '', $chunknum, $list );
+		$del->execute( '', '', $chunknum, '', $list );
+		$add->execute( '', '', $chunknum, '', $list );
 	}
 }
 
@@ -766,6 +766,10 @@ sub create_range {
 =head1 CHANGELOG
 
 =over 4
+
+=item 0.7.1
+
+Fix for empty sub chunks.
 
 =item 0.7
 
