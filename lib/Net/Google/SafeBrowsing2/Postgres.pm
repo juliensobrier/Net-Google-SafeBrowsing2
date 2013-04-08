@@ -40,6 +40,8 @@ Postgres.
 
 =over 4
 
+=back
+
 =head2 new()
 
 Create a Net::Google::SafeBrowsing2::Postgres object
@@ -78,8 +80,6 @@ in the database. 0 (delete) by default.
 
 =back
 
-=back
-
 =cut
 
 sub new {
@@ -115,13 +115,13 @@ sub new {
 
 See L<Net::Google::SafeBrowsing2::Storage> for a complete list of public functions.
 
+=back
+
 =head2 close()
 
 Cleanup old full hashes, and close the connection to the database.
 
   $storage->close();
-
-=back
 
 =cut
 
