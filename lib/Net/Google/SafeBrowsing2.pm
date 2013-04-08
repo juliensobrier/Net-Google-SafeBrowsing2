@@ -133,6 +133,8 @@ use constant {
 
 =over 4
 
+=back
+
 =head2 new()
 
 Create a Net::Google::SafeBrowsing2 object
@@ -181,8 +183,6 @@ Optional. Google Safe Browsing version. 2.2 by default
 
 =back
 
-=back
-
 =cut
 
 sub new {
@@ -216,6 +216,8 @@ sub new {
 =head1 PUBLIC FUNCTIONS
 
 =over 4
+
+=back
 
 =head2 update()
 
@@ -609,13 +611,13 @@ sub last_error {
 
 =pod
 
-=back
-
 =head1 PRIVATE FUNCTIONS
 
 These functions are not intended to be used externally.
 
 =over 4
+
+=back
 
 =head2 lookup_suffix()
 
@@ -1725,8 +1727,6 @@ sub expand_range {
 	return @list;
 }
 
-
-=back
 
 =head1 CHANGELOG
 

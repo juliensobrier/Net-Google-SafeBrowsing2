@@ -36,6 +36,8 @@ This is an implementation of L<Net::Google::SafeBrowsing2::Storage> using Sqlite
 
 =over 4
 
+=back
+
 =head2 new()
 
 Create a Net::Google::SafeBrowsing2::Sqlite object
@@ -60,8 +62,6 @@ Sqlite cache size. 20000 by default.
 
 =back
 
-
-=back
 
 =cut
 
@@ -90,14 +90,13 @@ sub new {
 
 See L<Net::Google::SafeBrowsing2::Storage> for a complete list of public functions.
 
+=back
+
 =head2 close()
 
 Cleanup old full hashes, and close the connection to the database.
 
   $storage->close();
-
-
-=back
 
 =cut
 
