@@ -32,14 +32,13 @@ This module cannot be used on its own as it does not actually store anything. Al
 
 =over 4
 
+=back
+
 =head2 new()
 
   Create a Net::Google::SafeBrowsing2::Storage object
 
   my $storage	=> Net::Google::SafeBrowsing2::Storage->new();
-
-
-=back
 
 =cut
 
@@ -57,6 +56,8 @@ sub new {
 =head1 PUBLIC FUNCTIONS
 
 =over 4
+
+=back
 
 =head2 add_chunks()
 
@@ -889,13 +890,13 @@ sub reset {
 }
 
 
-=back
-
 =head1 PRIVATE FUNCTIONS
 
 These functions are not intended for debugging purpose.
 
 =over 4
+
+=back
 
 =head2 hex_to_ascii()
 
@@ -936,8 +937,6 @@ sub ascii_to_hex {
 
 	return $hex;
 }
-
-=back
 
 =head1 CHANGELOG
 
