@@ -1441,7 +1441,8 @@ sub canonical_uri {
 
 	# canonial does not handle ../ 
 # 	$self->debug("\t$escape\n");
-	while($escape =~ s/([^\/])\/([^\/]+)\/\.\.([\/?].*)?$/$1$3/gi) {  }
+	while($escape =~ s/([^\/])\/([^\/]+)\/\.\.([\/?].*)$/$1$3/gi) {  }
+	while($escape =~ s/([^\/])\/([^\/]+)\/\.\.$/$1/gi) {  }
 
 	# May have removed ending /
 # 	$self->debug("\t$escape\n");
@@ -1478,7 +1479,8 @@ sub canonical_uri {
 # 	$self->debug("2. $url => $escape\n");
 
 	# Fix over escaping
-	while($escape =~ s/^([^?]+)%%(%.*)?$/$1%25%25$2/sgi) { }
+	while($escape =~ s/^([^?]+)%%(%.*)$/$1%25%25$2/sgi) { }
+	while($escape =~ s/^([^?]+)%%/$1%25%25/sgi) { }
 
 	# URI has issues with % in domains, it gets the host wrong
 

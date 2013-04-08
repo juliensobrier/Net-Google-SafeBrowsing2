@@ -1,0 +1,9 @@
+*~
+*.tar.gz
+*.tar
+.svn
+blib/
+pm_to_blib
+MYMETA.*
+Makefile
+Makefile.old
