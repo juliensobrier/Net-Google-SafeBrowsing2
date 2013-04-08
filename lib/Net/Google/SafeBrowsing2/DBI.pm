@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.7.1';
+our $VERSION = '1.0';
 
 
 =head1 NAME
@@ -18,6 +18,9 @@ our $VERSION = '0.7.1';
 Net::Google::SafeBrowsing2::DBI - Base class for all DBI-based back-end storage for the Google Safe Browsing v2 database
 
 =head1 SYNOPSIS
+
+Net::Google::SafeBrowsing2::DBI cannot be used directly. Instead, use a class inheriting Net::Google::SafeBrowsing2::DBI, like L<Net::Google::SafeBrowsing2::MySQL>.
+
 
   use Net::Google::SafeBrowsing2::MySQL;
 

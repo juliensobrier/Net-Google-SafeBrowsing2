@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '0.5';
+our $VERSION = '1.0';
 
 
 =head1 NAME
@@ -144,6 +144,14 @@ sub init {
 	if (! defined first { $_ =~ '`mac_keys`' } @tables) { 
 		$self->create_table_mac_keys();
 	}
+
+	# Remove indexes previously created
+	$self->{dbh}->do("ALTER TABLE `a_chunks` DROP INDEX `a_chunks_hostkey`") if ($self->{dbh}->do("SHOW INDEX FROM `a_chunks`WHERE KEY_NAME = 'a_chunks_hostkey'") > 0);
+	$self->{dbh}->do("ALTER TABLE `a_chunks` DROP INDEX `a_chunks_num_list`") if ($self->{dbh}->do("SHOW INDEX FROM `a_chunks`WHERE KEY_NAME = 'a_chunks_num_list'") > 0);
+
+	$self->{dbh}->do("ALTER TABLE `s_chunks` DROP INDEX `s_chunks_hostkey`") if ($self->{dbh}->do("SHOW INDEX FROM `s_chunks`WHERE KEY_NAME = 's_chunks_hostkey'") > 0);
+	$self->{dbh}->do("ALTER TABLE `s_chunks` DROP INDEX `s_chunks_num`") if ($self->{dbh}->do("SHOW INDEX FROM `s_chunks`WHERE KEY_NAME = 's_chunks_num'") > 0);
+	$self->{dbh}->do("ALTER TABLE `s_chunks` DROP INDEX `s_chunks_num_list`") if ($self->{dbh}->do("SHOW INDEX FROM `s_chunks`WHERE KEY_NAME = 's_chunks_num_list'") > 0);
 }
 
 
@@ -181,7 +189,7 @@ sub create_table_a_chunks {
 			hostkey
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE INDEX a_chunks_num_list ON a_chunks (
@@ -189,7 +197,7 @@ sub create_table_a_chunks {
 			list
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE UNIQUE INDEX a_chunks_unique ON a_chunks (
@@ -222,14 +230,14 @@ sub create_table_s_chunks {
 			hostkey
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE INDEX s_chunks_num ON s_chunks (
 			num
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE INDEX s_chunks_num_list ON s_chunks (
@@ -237,7 +245,7 @@ sub create_table_s_chunks {
 			list
 		);
 	};
-	$self->{dbh}->do($index);
+# 	$self->{dbh}->do($index);
 
 	$index = qq{
 		CREATE UNIQUE INDEX s_chunks_unique ON s_chunks (
@@ -312,6 +320,7 @@ sub add_chunks_s {
 	my $list			= $args{'list'}		|| '';
 
 	my $add = $self->{dbh}->prepare('INSERT IGNORE INTO s_chunks (hostkey, prefix, num, add_num, list) VALUES (?, ?, ?, ?, ?)');
+	$self->{dbh}->{AutoCommit} = 0;
 
 	foreach my $chunk (@$chunks) {
 		$add->execute( $chunk->{host}, $chunk->{prefix}, $chunknum, $chunk->{add_chunknum}, $list );
@@ -320,6 +329,9 @@ sub add_chunks_s {
 	if (scalar @$chunks == 0) { # keep empty chunks
 		$add->execute( '', '',  $chunknum, '', $list );
 	}
+
+	$self->{dbh}->commit;
+	$self->{dbh}->{AutoCommit} = 1;
 }
 
 sub add_chunks_a {
@@ -329,6 +341,7 @@ sub add_chunks_a {
 	my $list			= $args{'list'}		|| '';
 
 	my $add = $self->{dbh}->prepare('INSERT IGNORE INTO a_chunks (hostkey, prefix, num, list) VALUES (?, ?, ?, ?)');
+	$self->{dbh}->{AutoCommit} = 0;
 
 	foreach my $chunk (@$chunks) {
 		# 32-byte prefix seen at chunk 69961
@@ -343,15 +356,22 @@ sub add_chunks_a {
 	if (scalar @$chunks == 0) { # keep empty chunks
 		$add->execute( '', '', $chunknum, $list );
 	}
+
+	$self->{dbh}->commit;
+	$self->{dbh}->{AutoCommit} = 1;
 }
 
 =head1 CHANGELOG
 
 =over 4
 
+=item 0.6
+
+Remove some indexes to speed up INSERTs.
+
 =item 0.5
 
-Keep empty sub chunks. Shorten prefixes greater than 8 bytes (workaround tro keep schema tight)
+Keep empty sub chunks. Shorten prefixes greater than 8 bytes (workaround to keep schema tight)
 
 =item 0.4
 

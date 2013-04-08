@@ -20,7 +20,7 @@ use File::Slurp;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 
 =head1 NAME
@@ -175,6 +175,10 @@ The debug output maybe quite large and can slow down significantly the update an
 
 Optional. Set to 1 to show errors to STDOUT. 0 (disabled by default).
 
+=item perf
+
+Optional. Set to 1 to show performance information.
+
 =item version
 
 Optional. Google Safe Browsing version. 2.2 by default
@@ -196,6 +200,7 @@ sub new {
 		errors		=> 0,
 		last_error	=> '',
 		mac			=> 0,
+		perf		=> 0,
 
 		%args,
 	};
@@ -265,8 +270,8 @@ sub update {
 
 	my $result = 0;
 
-
-	# too early to update? need to handle errors
+	# Too early to update?
+	my $start = time();
 	my $i = 0;
 	while ($i < scalar @lists) {
 		my $list = $lists[$i];
@@ -286,6 +291,7 @@ sub update {
 		$self->debug("Too early to update any list\n");
 		return NO_UPDATE;
 	}
+	$self->perf("OK to update check: " . (time() - $start) . "s\n");
 	
 	# MAC?
 	my $client_key = '';
@@ -309,8 +315,10 @@ sub update {
 	my $body = '';
 	foreach my $list (@lists) {
 		# Report existng chunks
+		$start = time();
 		my $a_range = $self->create_range(numbers => [$self->{storage}->get_add_chunks_nums(list => $list)]);
 		my $s_range = $self->create_range(numbers => [$self->{storage}->get_sub_chunks_nums(list => $list)]);
+		$self->perf("Create add and sub ranges: " . (time() - $start) . "s\n");
 	
 		my $chunks_list = '';
 		if ($a_range ne '') {
@@ -326,12 +334,14 @@ sub update {
 		$body .= "\n";
 	}
 
-
+	my $start_req = time();
 	my $res = $ua->post($url, Content =>  $body);
+	$self->perf("$body\n");
 
 # 	$self->debug($res->request->as_string . "\n" . $res->as_string . "\n");
-	$self->debug($res->request->as_string . "\n");
-	$self->debug($res->as_string . "\n");
+	$self->debug($res->request->as_string . "\n") if ($self->{debug});
+	$self->debug($res->as_string . "\n") if ($self->{debug});
+	my $duration_req = time() - $start_req;
 
 	if (! $res->is_success) {
 		$self->error("Request failed\n");
@@ -347,6 +357,9 @@ sub update {
 	my $wait = 0;
 
 	my @redirections = ();
+	my $del_add_duration = 0;
+	my $del_sub_duration = 0;
+	my $add_range_info = '';
 
 	my @lines = split/\s/, $res->decoded_content;
 	$list = '';
@@ -371,19 +384,24 @@ sub update {
 		elsif ($line =~ /ad:(\S+)$/) {
 			$self->debug("Delete Add Chunks: $1\n");
 
+			my $del_add_start = time();
+			$add_range_info = $1 . " $list";
 			my @nums = $self->expand_range(range => $1);
 			$self->{storage}->delete_add_ckunks(chunknums => [@nums], list => $list);
 
 			# Delete full hash as well
 			$self->{storage}->delete_full_hashes(chunknums => [@nums], list => $list);
+			$del_add_duration = time() - $del_add_start;
 
 			$result = 1;
 		}
 		elsif ($line =~ /sd:(\S+)$/) {
 			$self->debug("Delete Sub Chunks: $1\n");
 
+			my $del_sub_start = time();
 			my @nums = $self->expand_range(range => $1);
 			$self->{storage}->delete_sub_ckunks(chunknums => [@nums], list => $list);
+			$del_add_duration = time() - $del_sub_start;
 
 			$result = 1;
 		}
@@ -416,11 +434,13 @@ sub update {
 		}
 	}
 	$self->debug("\n");
+	$self->perf("Handle first request: " . (time() - $last_update) . "s (POST: ${duration_req}s, DEL add: ${del_add_duration}s, DEL sub: ${del_sub_duration}s, ADD range: ${add_range_info})\n");
 
 	$result = 1 if (scalar @redirections > 0);
 
-
+	$self->perf("Parse redirections: ");
 	foreach my $data (@redirections) {
+		$start = time();
 		my $redirection = $data->[0];
 		$list = $data->[1];
 		my $hmac = $data->[2];
@@ -456,7 +476,9 @@ sub update {
 
 			return $result;
 		}
+		$self->perf((time() - $start) . "s ");
 	}
+	$self->perf("\n");
 
 	foreach my $list (@lists) {
 		$self->debug("List update: $last_update $wait $list\n");
@@ -653,7 +675,7 @@ sub lookup_suffix {
 		foreach my $full_hash (@full_hashes) {
 			foreach my $hash (@hashes) {
 				if ($hash eq $full_hash && defined first { $add_chunk->{list} eq $_ } @$lists) {
-					$self->debug("Full hash was found in storage\n");
+					$self->debug("Full hash was found in storage: " . $self->hex_to_ascii($hash) . "\n");
 					$found = $add_chunk->{list};
 					last;
 				}
@@ -683,7 +705,7 @@ sub lookup_suffix {
 		if (defined $hash && defined $list) {
 # 			$self->debug($self->hex_to_ascii($hash->{hash}) . " eq " . $self->hex_to_ascii($full_hash) . "\n\n");
 
-			$self->debug("Match\n");
+			$self->debug("Match: " . $self->hex_to_ascii($full_hash)  . "\n");
 
 			return $hash->{list};
 		}
@@ -1253,6 +1275,19 @@ sub error {
 	$self->{last_error} = $message;
 }
 
+
+=head2 error()
+
+Print performance message.
+
+=cut
+
+sub perf {
+	my ($self, $message) = @_;
+
+	print $message if ($self->{perf} > 0);
+}
+
 =head2 canonical_domain_suffixes()
 
 Find all suffixes for a domain.
@@ -1498,6 +1533,7 @@ sub full_hashes {
 	foreach my $url (@urls) {
 # 		$self->debug("$url\n");
 		push(@hashes, sha256($url));
+# 		$self->debug("$url " . $self->hex_to_ascii(sha256($url)) . "\n");
 	}
 
 	return @hashes;
@@ -1796,7 +1832,6 @@ Fix value of FULL_HASH_TIME.
 =item 0.2
 
 Add support for Message Authentication Code (MAC)
-
 
 =back
 

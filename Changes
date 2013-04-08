@@ -68,3 +68,6 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 
 1.07 Fri Jun 08 18:38:00
 		- Import/Export feature for add chunks and sub chunks. Can be used to move from one back-end storage to another.
+
+1.08 Mon Apr 08 2013 07:48:00
+		- Fix Po docmentation (contribution)
