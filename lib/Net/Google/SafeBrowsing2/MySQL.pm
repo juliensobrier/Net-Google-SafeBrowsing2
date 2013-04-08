@@ -36,6 +36,8 @@ This is an implementation of L<Net::Google::SafeBrowsing2::Storage> using MySQL.
 
 =over 4
 
+=back
+
 =head2 new()
 
 Create a Net::Google::SafeBrowsing2::MySQL object
@@ -78,8 +80,6 @@ Optional. Set to 1 to keep old information (such as expiring full hashes) in the
 =back
 
 
-=back
-
 =cut
 
 sub new {
@@ -108,14 +108,14 @@ sub new {
 
 See L<Net::Google::SafeBrowsing2::Storage> for a complete list of public functions.
 
+=back
+
 =head2 close()
 
 Cleanup old full hashes, and close the connection to the database.
 
   $storage->close();
 
-
-=back
 
 =cut
 

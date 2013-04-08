@@ -36,6 +36,8 @@ This is a base implementation of L<Net::Google::SafeBrowsing2::Storage> using DB
 
 =over 4
 
+=back
+
 =head2 new()
 
 This method should be overwritten.
@@ -47,8 +49,6 @@ Arguments
 =item keep_all
 
 Optional. Set to 1 to keep old information (such as expiring full hashes) in the database. 0 (delete) by default.
-
-=back
 
 
 =back
@@ -76,6 +76,8 @@ sub new {
 =over 4
 
 See L<Net::Google::SafeBrowsing2::Storage> for a complete list of public functions.
+
+=back
 
 =head2 close()
 
@@ -239,10 +241,6 @@ sub export {
 
 	CORE::close(EXPORT);
 }
-
-=back
-
-=cut
 
 sub init {
 	my ($self, %args) = @_;

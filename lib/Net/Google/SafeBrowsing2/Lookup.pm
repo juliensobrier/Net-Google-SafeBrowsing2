@@ -45,6 +45,8 @@ The source code is available on github at L<https://github.com/juliensobrier/Net
 
 =over 4
 
+=back
+
 =head2 new()
 
 Create a Net::Google::SafeBrowsing2::Lookup object
@@ -82,8 +84,6 @@ Optional. Delay, in seconds, between 2 requests to the Google server. See the C<
 
 =back
 
-=back
-
 =cut
 
 sub new {
@@ -108,6 +108,8 @@ sub new {
 =head1 PUBLIC FUNCTIONS
 
 =over 4
+
+=back
 
 =head2 lookup()
 
@@ -366,8 +368,6 @@ sub canonical_uri {
 	return URI->new($escape);
 }
 
-
-=back
 
 =head1 CHANGELOG
 
