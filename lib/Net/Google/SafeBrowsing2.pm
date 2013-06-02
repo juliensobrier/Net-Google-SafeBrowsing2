@@ -311,7 +311,7 @@ sub update {
 
 	my $ua = $self->ua;
 
-	my $url = "http://safebrowsing.clients.google.com/safebrowsing/downloads?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = "https://safebrowsing.clients.google.com/safebrowsing/downloads?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 	$url .= "&wrkey=$wrapped_key" if ($mac);
 
 	my $body = '';
