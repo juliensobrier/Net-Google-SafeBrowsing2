@@ -49,7 +49,7 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 		- add Net::Google::SafeBrowsing2::Lookup (http://code.google.com/apis/safebrowsing/lookup_guide.html)
 
 	 Wed Dec 07 10:49:00
-		- Net::Google::SafeBrowsing2::Sqlite, xndex s_chunks_unique was created at the wrong place
+		- Net::Google::SafeBrowsing2::Sqlite, index s_chunks_unique was created at the wrong place
 
 	Tue Dec 12 15:41:00
 		- Net::Google::SafeBrowsing2::Lookup 0.2: documentation update
@@ -70,4 +70,7 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 		- Import/Export feature for add chunks and sub chunks. Can be used to move from one back-end storage to another.
 
 1.08 Mon Apr 08 2013 07:48:00
-		- Fix Po docmentation (contribution)
+		- Fix Po documentation (contribution)
+
+1.09 Wed Jun 05 2013 20:29:00
+		- Use HTTPS to access safebrowsing.clients.google.com/.

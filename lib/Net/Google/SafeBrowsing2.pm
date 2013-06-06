@@ -15,12 +15,19 @@ use MIME::Base64::URLSafe;
 use MIME::Base64;
 use String::HexConvert;
 use File::Slurp;
+use IO::Socket::SSL;
 
 
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
+
+BEGIN {
+    IO::Socket::SSL::set_ctx_defaults(
+        verify_mode => Net::SSLeay->VERIFY_PEER(),
+    );
+}
 
 
 =head1 NAME
@@ -447,8 +454,8 @@ sub update {
 		$list = $data->[1];
 		my $hmac = $data->[2];
 
-		$self->debug("Checking redirection http://$redirection ($list)\n");
-		$res = $ua->get("http://$redirection");
+		$self->debug("Checking redirection https://$redirection ($list)\n");
+		$res = $ua->get("https://$redirection");
 		if (! $res->is_success) {
 			$self->error("Request to $redirection failed\n");
 
@@ -600,7 +607,7 @@ NOTE: this function is useless in practice because Google includes some lists wh
 sub get_lists {
 	my ($self, %args) = @_;
 
-	my $url = "http://safebrowsing.clients.google.com/safebrowsing/list?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = "https://safebrowsing.clients.google.com/safebrowsing/list?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $res = $self->ua->get($url);
 
@@ -910,7 +917,7 @@ sub request_mac_keys {
 	my $client_key = '';
 	my $wrapped_key = '';
 
-	my $url = "http://sb-ssl.google.com/safebrowsing/newkey?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = "https://sb-ssl.google.com/safebrowsing/newkey?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $res = $self->ua->get($url);
 
@@ -1593,7 +1600,7 @@ sub request_full_hash {
 		}
 	}
 
-	my $url = "http://safebrowsing.clients.google.com/safebrowsing/gethash?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = "https://safebrowsing.clients.google.com/safebrowsing/gethash?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $prefix_list = join('', @$prefixes);
 	my $header = "$size:" . scalar @$prefixes * $size;
@@ -1769,6 +1776,10 @@ sub expand_range {
 =head1 CHANGELOG
 
 =over 4
+
+=item 1.09
+
+Use HTTPS to access safebrowsing.clients.google.com/.
 
 =item 1.07
 
