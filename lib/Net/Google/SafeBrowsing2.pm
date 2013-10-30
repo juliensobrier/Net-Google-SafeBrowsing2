@@ -158,6 +158,14 @@ Arguments
 
 =over 4
 
+=item server
+
+Safe Browsing Server. https://safebrowsing.clients.google.com/safebrowsing/ by default
+
+=item mac_server
+
+Safe Browsing MAC Server. https://sb-ssl.google.com/safebrowsing/ by default
+
 =item key
 
 Required. Your Google Safe browsing API key
@@ -200,6 +208,8 @@ sub new {
 	my ($class, %args) = @_;
 
 	my $self = { # default arguments
+		server		=> 'https://safebrowsing.clients.google.com/safebrowsing/',
+		mac_server	=> 'https://sb-ssl.google.com/safebrowsing/',
 		list		=> ['googpub-phish-shavar', 'goog-malware-shavar'],
 		key			=> '',
 		version		=> '2.2',
@@ -318,7 +328,7 @@ sub update {
 
 	my $ua = $self->ua;
 
-	my $url = "https://safebrowsing.clients.google.com/safebrowsing/downloads?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = $self->{server} . "downloads?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 	$url .= "&wrkey=$wrapped_key" if ($mac);
 
 	my $body = '';
@@ -607,7 +617,7 @@ NOTE: this function is useless in practice because Google includes some lists wh
 sub get_lists {
 	my ($self, %args) = @_;
 
-	my $url = "https://safebrowsing.clients.google.com/safebrowsing/list?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = $self->{server} . "list?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $res = $self->ua->get($url);
 
@@ -917,7 +927,7 @@ sub request_mac_keys {
 	my $client_key = '';
 	my $wrapped_key = '';
 
-	my $url = "https://sb-ssl.google.com/safebrowsing/newkey?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = $self->{mac_server} . "newkey?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $res = $self->ua->get($url);
 
@@ -1600,7 +1610,7 @@ sub request_full_hash {
 		}
 	}
 
-	my $url = "https://safebrowsing.clients.google.com/safebrowsing/gethash?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
+	my $url = $self->{server} . "gethash?client=api&apikey=" . $self->{key} . "&appver=$VERSION&pver=" . $self->{version};
 
 	my $prefix_list = join('', @$prefixes);
 	my $header = "$size:" . scalar @$prefixes * $size;
