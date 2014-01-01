@@ -15,13 +15,13 @@ use MIME::Base64::URLSafe;
 use MIME::Base64;
 use String::HexConvert;
 use File::Slurp;
-use IO::Socket::SSL;
+use IO::Socket::SSL 'inet4' ;
 
 
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 BEGIN {
     IO::Socket::SSL::set_ctx_defaults(
@@ -1776,6 +1776,10 @@ sub expand_range {
 =head1 CHANGELOG
 
 =over 4
+
+=item 1.10
+
+Force IPv4 to solve bug on CentOS.
 
 =item 1.09
 

@@ -74,3 +74,6 @@ Revision history for Perl extension Net::Google::SafeBrowsing2.
 
 1.09 Wed Jun 05 2013 20:29:00
 		- Use HTTPS to access safebrowsing.clients.google.com/.
+
+1.10 Tue Dec 31 2013 22:15:00
+		- Force IPv4 to solve bug on CentOS.
