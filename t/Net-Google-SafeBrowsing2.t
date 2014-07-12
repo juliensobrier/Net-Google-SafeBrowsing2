@@ -67,6 +67,8 @@ is( $gsb->canonical_uri('http://www.google.com/a/../b/..')->as_string, 'http://w
 is( $gsb->canonical_uri('http://www.google.com/a/../b/..?foo')->as_string, 'http://www.google.com/?foo', 'canonicalization "http://www.google.com/a/../b/..?foo" is OK');
 is( $gsb->canonical_uri('http://www.google.com/#a#b')->as_string, 'http://www.google.com/', 'canonicalization "http://www.google.com/#a#b" is OK');
 is( $gsb->canonical_uri('http://www.google.com/#a#b#c')->as_string, 'http://www.google.com/', 'canonicalization "http://www.google.com/#a#b#c" is OK');
+is( $gsb->canonical_uri('http://16843009/index.html')->as_string, 'http://1.1.1.1/index.html', 'canonicalization "http://16843009/index.html" is OK');
+is( $gsb->canonical_uri('http://1/index.html')->as_string, 'http://0.0.0.1/index.html', 'canonicalization "http://16843009/index.html" is OK');
 
 # Form Google API doc, possible strings for lookup
 my @values = $gsb->canonical('http://a.b.c/1/2.html?param=1');

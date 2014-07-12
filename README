@@ -1,4 +1,4 @@
-Net-Google-SafeBrowsing2 version 1.08
+Net-Google-SafeBrowsing2 version 1.10
 =====================================
 
 Net::Google::SafeBrowsing2 implements the Google Safe Browsing v2 API.
@@ -33,7 +33,6 @@ This module requires these other modules and libraries:
   Digest::SHA
   List::Util
   constant
-  Net::IPAddress
   Test::More
   Text::Trim
   Digest::HMAC_SHA1
@@ -41,6 +40,7 @@ This module requires these other modules and libraries:
   MIME::Base64
   String::HexConvert
   File::Slurp
+  IO::Socket::SSL
 
 
 COPYRIGHT AND LICENCE

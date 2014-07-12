@@ -10,7 +10,6 @@ WriteMakefile(
 		Digest::SHA			=> 0,
 		List::Util			=> 0,
 		constant			=> 0,
-		Net::IPAddress			=> 0,
 		Test::More			=> 0,
 		Text::Trim			=> 0,
 		Digest::HMAC_SHA1		=> 0,
@@ -18,6 +17,7 @@ WriteMakefile(
 		MIME::Base64			=> 0,
 		String::HexConvert		=> 0,
 		File::Slurp			=> 0,
+		IO::Socket::SSL			=> 0,
 	},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Net/Google/SafeBrowsing2.pm', # retrieve abstract from module

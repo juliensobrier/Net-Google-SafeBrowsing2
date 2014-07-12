@@ -8,7 +8,6 @@ use LWP::UserAgent;
 use URI;
 use Digest::SHA qw(sha256);
 use List::Util qw(first);
-use Net::IPAddress;
 use Text::Trim;
 use Digest::HMAC_SHA1 qw(hmac_sha1 hmac_sha1_hex);
 use MIME::Base64::URLSafe;
@@ -21,7 +20,7 @@ use IO::Socket::SSL 'inet4' ;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 BEGIN {
     IO::Socket::SSL::set_ctx_defaults(
@@ -1467,16 +1466,14 @@ sub canonical_uri {
 	$escape =~ s/^([a-z]+:\/\/[^\/]+)(\?.*)$/$1\/$2/gi;
 # 	$self->debug("\t$escape\n");
 
-	# other weird case if domain = digits only, try to translte it to IP address
+	# other weird case if domain = digits only, try to translate it to IP address
 	if ((my $domain = URI->new($escape)->host) =~/^\d+$/) {
-		my $ip = num2ip($domain);
+		my $ip = Socket::inet_ntoa(Socket::inet_aton($domain));
 
-		if (validaddr($ip)) {
-			$uri = URI->new($escape);
-			$uri->host($ip);
+		$uri = URI->new($escape);
+		$uri->host($ip);
 
-			$escape = $uri->as_string;
-		}
+		$escape = $uri->as_string;
 	}
 
 # 	$self->debug("1. $url => $escape\n");
@@ -1787,6 +1784,11 @@ sub expand_range {
 
 =over 4
 
+=item 1.11
+
+Add dependency on IO::Socket::SSL.
+Remove dependency on Net::IPAddress.
+
 =item 1.10
 
 Force IPv4 to solve bug on CentOS.
@@ -1864,11 +1866,15 @@ Add support for Message Authentication Code (MAC)
 
 =head1 SEE ALSO
 
+Source code available at L<https://github.com/juliensobrier/Net-Google-SafeBrowsing2>.
+
 See L<Net::Google::SafeBrowsing2::Storage>, L<Net::Google::SafeBrowsing2::Sqlite> and L<Net::Google::SafeBrowsing2::MySQL> for information on storing and managing the Google Safe Browsing database.
 
 Google Safe Browsing v2 API: L<http://code.google.com/apis/safebrowsing/developers_guide_v2.html>
 
 L<Net::Google::SafeBrowsing> (Google Safe Browsing v1) is deprecated by Google since 12/01/2011.
+
+L<Net::Google::SafeBrowsing2> (Google Safe Browsing v2) will deprecated by Google on 12/01/2014.
 
 =head1 AUTHOR
 
