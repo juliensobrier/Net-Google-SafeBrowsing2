@@ -20,11 +20,12 @@ use IO::Socket::SSL 'inet4' ;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 BEGIN {
     IO::Socket::SSL::set_ctx_defaults(
-        verify_mode => Net::SSLeay->VERIFY_PEER(),
+#         verify_mode => Net::SSLeay->VERIFY_PEER(),
+	SSL_verify_mode => 0,
     );
 }
 
@@ -210,12 +211,12 @@ sub new {
 		server		=> 'https://safebrowsing.clients.google.com/safebrowsing/',
 		mac_server	=> 'https://sb-ssl.google.com/safebrowsing/',
 		list		=> ['googpub-phish-shavar', 'goog-malware-shavar'],
-		key			=> '',
+		key		=> '',
 		version		=> '2.2',
 		debug		=> 0,
 		errors		=> 0,
 		last_error	=> '',
-		mac			=> 0,
+		mac		=> 0,
 		perf		=> 0,
 
 		%args,
@@ -277,10 +278,10 @@ Be careful if you set this option to 1 as too frequent updates might result in t
 
 sub update {
 	my ($self, %args) 	= @_;
-# 	my @lists 			= @{[$args{list}]}	|| @{$self->{list}} || croak "Missing list name\n";
-	my $list			= $args{list};
-	my $force 			= $args{force}	|| 0;
-	my $mac				= $args{mac}	|| $self->{mac}	|| 0;
+# 	my @lists 		= @{[$args{list}]}	|| @{$self->{list}} || croak "Missing list name\n";
+	my $list		= $args{list};
+	my $force 		= $args{force}	|| 0;
+	my $mac			= $args{mac}	|| $self->{mac}	|| 0;
 
 
 	my @lists = @{$self->{list}};
@@ -669,7 +670,7 @@ sub lookup_suffix {
 	my $url 			= $args{url}		|| return '';
 	my $suffix			= $args{suffix}		|| return '';
 
-	# Calculcate prefixes
+	# Calculate prefixes
 	my @full_hashes = $self->full_hashes($url); # Get the prefixes from the first 4 bytes
 	my @full_hashes_prefix = map (substr($_, 0, 4), @full_hashes);
 
@@ -737,7 +738,7 @@ sub lookup_suffix {
 	return '';
 }
 
-=head2 lookup_suffix()
+=head2 local_lookup_suffix()
 
 Lookup a host prefix in the local database only.
 
@@ -760,7 +761,7 @@ sub local_lookup_suffix {
 		return @add_chunks;
 	}
 
-	# Step 2: calculcate prefixes
+	# Step 2: calculate prefixes if not provided
 	# Get the prefixes from the first 4 bytes
 	my @full_hashes_prefix = @{$full_hashes_prefix_list};
 	if (scalar @full_hashes_prefix == 0) {
@@ -1061,9 +1062,9 @@ sub ua {
 }
 
 
-=head2 parse_s()
+=head2 parse_data()
 
-Parse data from a rediration (add asnd sub chunk information).
+Parse data from a rediration (add and sub chunk information).
 
 =cut
 
@@ -1536,7 +1537,7 @@ sub canonical_uri {
 	return URI->new($escape);
 }
 
-=head2 canonical()
+=head2 full_hashes()
 
 Return all possible full hashes for a URL.
 

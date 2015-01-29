@@ -10,7 +10,7 @@ use DBI;
 use List::Util qw(first);
 
 
-our $VERSION = '1.0';
+our $VERSION = '1.01';
 
 
 =head1 NAME
@@ -249,7 +249,7 @@ sub init {
 	my ($self, %args) = @_;
 
 	# Should connect to database
-	# Shoudl check if all tables exist
+	# Should check if all tables exist
 }
 
 
@@ -819,7 +819,7 @@ Julien Sobrier, E<lt>jsobrier@zscaler.comE<gt> or E<lt>julien@sobrier.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Julien Sobrier
+Copyright (C) 2015 by Julien Sobrier
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
