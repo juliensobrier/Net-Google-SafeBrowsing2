@@ -1,4 +1,4 @@
-Net-Google-SafeBrowsing2 version 1.11
+Net-Google-SafeBrowsing2 version 1.12
 =====================================
 
 Net::Google::SafeBrowsing2 implements the Google Safe Browsing v2 API.
@@ -45,7 +45,7 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2013 by Julien Sobrier
+Copyright (C) 2015 by Julien Sobrier
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

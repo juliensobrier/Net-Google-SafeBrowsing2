@@ -20,7 +20,7 @@ use IO::Socket::SSL 'inet4' ;
 use Exporter 'import';
 our @EXPORT = qw(DATABASE_RESET MAC_ERROR MAC_KEY_ERROR INTERNAL_ERROR SERVER_ERROR NO_UPDATE NO_DATA SUCCESSFUL MALWARE PHISHING);
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 BEGIN {
     IO::Socket::SSL::set_ctx_defaults(
@@ -32,7 +32,9 @@ BEGIN {
 
 =head1 NAME
 
-Net::Google::SafeBrowsing2 - Perl extension for the Google Safe Browsing v2 API. (Google Safe Browsing v1 has been deprecated by Google.)
+DEPRECATED. Please use L<Net::Google::SafeBrowsing3> for the Google Safe Browsing v3 API.
+
+Net::Google::SafeBrowsing2 - Perl library for the Google Safe Browsing v2 API. (Google Safe Browsing v1 has been deprecated by Google.)
 
 =head1 SYNOPSIS
 
